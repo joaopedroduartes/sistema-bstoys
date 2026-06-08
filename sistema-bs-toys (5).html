@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sistema BS TOYS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f0f4fb;color:#1a2540;min-height:100vh;font-size:14px;display:flex;transition:background .2s,color .2s}
+
+/* SIDEBAR */
+.sidebar{width:220px;min-height:100vh;background:#fff;border-right:1px solid #e2e7f0;display:flex;flex-direction:column;padding:24px 12px;flex-shrink:0;transition:background .2s,border-color .2s}
+.brand{display:flex;align-items:center;gap:9px;padding:0 8px;margin-bottom:28px}
+.brand-dot{width:9px;height:9px;background:#1a6ef5;border-radius:50%;flex-shrink:0}
+.brand h1{font-size:14px;font-weight:600;color:#1a2540;letter-spacing:-.2px;line-height:1.2}
+.brand p{font-size:10px;color:#b0b9cc;margin-top:1px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:#3a4560;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;margin-bottom:2px;font-family:'Inter',sans-serif}
+.nav-item:hover{background:#f0f4fb;color:#0d1530}
+.nav-item.active{background:#e8f0fe;color:#1a6ef5;font-weight:600}
+.nav-item .icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.nav-item .n-badge{margin-left:auto;font-size:10px;background:#e2e7f0;color:#6b7a99;border-radius:10px;padding:1px 6px;font-weight:600}
+.nav-item.active .n-badge{background:#1a6ef5;color:#fff}
+.sidebar-footer{margin-top:auto;padding:0 8px}
+.theme-btn{display:flex;align-items:center;gap:8px;width:100%;background:none;border:1px solid #e2e7f0;border-radius:8px;padding:8px 10px;font-size:12px;font-family:'Inter',sans-serif;color:#3a4560;cursor:pointer;transition:all .15s}
+.theme-btn:hover{border-color:#1a6ef5;color:#1a6ef5}
+
+/* MAIN */
+.main{flex:1;min-width:0;padding:32px 28px 60px;max-width:900px}
+.page{display:none}
+.page.active{display:block}
+
+/* TOP BAR */
+.topbar{margin-bottom:24px}
+.topbar h2{font-size:18px;font-weight:600;color:#1a2540;letter-spacing:-.3px}
+.topbar p{font-size:12px;color:#6b7a99;margin-top:2px}
+
+/* DASHBOARD */
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.dash-card{background:#fff;border:1px solid #e2e7f0;border-radius:12px;padding:16px 18px}
+.dash-card .dc-label{font-size:11px;color:#6b7a99;font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.dash-card .dc-value{font-size:28px;font-weight:600;color:#1a2540;letter-spacing:-.5px}
+.dash-card.blue .dc-value{color:#1a6ef5}
+.dash-card.orange .dc-value{color:#e09030}
+.dash-card.green .dc-value{color:#1a8c4e}
+.dash-card.gray .dc-value{color:#6b7a99}
+.dash-section{background:#fff;border:1px solid #e2e7f0;border-radius:12px;padding:16px 18px;margin-bottom:12px}
+.dash-section h3{font-size:13px;font-weight:600;color:#1a2540;margin-bottom:12px}
+.dash-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f0f3f9}
+.dash-row:last-child{border-bottom:none}
+.dash-row .dr-title{flex:1;font-size:13px;color:#1a2540;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-row .dr-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px}
+.dash-row .dr-date{font-size:11px;color:#6b7a99}
+.dash-empty{font-size:12px;color:#6b7a99;text-align:center;padding:16px 0}
+.dash-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ADD BOX */
+.add-box{background:#fff;border:1px solid #e2e7f0;border-radius:12px;padding:16px;margin-bottom:20px}
+.add-row{display:flex;gap:8px;margin-bottom:8px}
+.add-row:last-child{margin-bottom:0}
+.add-row input,.add-row select,.add-row textarea{border:1px solid #dde2ee;border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;color:#1a2540;background:#f8faff;outline:none;transition:border .15s}
+.add-row input{flex:1}
+.add-row input:focus,.add-row textarea:focus,.add-row select:focus{border-color:#1a6ef5;background:#fff}
+.add-row input::placeholder,.add-row textarea::placeholder{color:#8a94a8}
+.add-row select{cursor:pointer}
+.add-row textarea{flex:1;resize:none;height:62px;font-family:'Inter',sans-serif}
+.add-grid{display:grid;grid-template-columns:1fr 2fr 1fr auto;gap:8px;align-items:flex-end}
+.add-grid .field{display:flex;flex-direction:column;gap:4px}
+.add-grid .field label{font-size:11px;font-weight:600;color:#6b7a99;text-transform:uppercase;letter-spacing:.4px}
+.add-grid input,.add-grid select{width:100%;border:1px solid #dde2ee;border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;color:#1a2540;background:#f8faff;outline:none}
+.add-grid input:focus,.add-grid select:focus{border-color:#1a6ef5;background:#fff}
+.add-grid select{cursor:pointer}
+.btn-add{background:#1a6ef5;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;transition:background .15s}
+.btn-add:hover{background:#155dd4}
+
+/* RETORNO FORM */
+.ret-form-title{font-size:13px;font-weight:600;color:#1a2540;margin-bottom:3px}
+.ret-form-sub{font-size:11px;color:#6b7a99;margin-bottom:12px}
+.ret-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.ret-grid .field{display:flex;flex-direction:column;gap:4px}
+.ret-grid .field label{font-size:11px;font-weight:600;color:#6b7a99;text-transform:uppercase;letter-spacing:.4px}
+.ret-grid input{width:100%;border:1px solid #dde2ee;border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;color:#1a2540;background:#f8faff;outline:none}
+.ret-grid input:focus{border-color:#1a6ef5;background:#fff}
+.ret-grid .display{border:1px solid #dde2ee;border-radius:8px;padding:9px 12px;font-size:13px;color:#6b7a99;background:#f8faff}
+.btn-add.full{padding:11px 18px;font-size:13px}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid #e2e7f0;margin-bottom:16px}
+.tab{background:none;border:none;border-bottom:2px solid transparent;padding:8px 16px;font-size:13px;font-family:'Inter',sans-serif;color:#4a5470;cursor:pointer;margin-bottom:-1px;transition:all .15s;display:flex;align-items:center;gap:6px}
+.tab:hover{color:#1a2540}
+.tab.active{color:#1a6ef5;border-bottom-color:#1a6ef5;font-weight:500}
+.tab-n{font-size:11px;background:#e2e7f0;color:#3a4560;border-radius:10px;padding:1px 6px;font-weight:600}
+.tab.active .tab-n{background:#1a6ef5;color:#fff}
+
+/* FILTERS */
+.filters{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.chip{background:none;border:1px solid #dde2ee;border-radius:20px;padding:4px 12px;font-size:12px;font-family:'Inter',sans-serif;color:#4a5470;cursor:pointer;transition:all .15s}
+.chip:hover{border-color:#1a6ef5;color:#1a6ef5}
+.chip.active{background:#1a6ef5;color:#fff;border-color:#1a6ef5}
+
+/* CARDS */
+.card{background:#fff;border:1px solid #e2e7f0;border-radius:10px;padding:14px 16px;margin-bottom:8px;transition:all .15s}
+.card:hover{box-shadow:0 2px 12px rgba(26,110,245,.07);border-color:#d0d8ee}
+.card.done-card{opacity:.6}
+.card.div-card{border-left:3px solid #e09030}
+.card.div-card.resolved{border-left-color:#1a8c4e}
+.card.ret-card{border-left:3px solid #1a8c4e}
+.card-row{display:flex;align-items:flex-start;gap:10px}
+.card-info{flex:1;min-width:0}
+.card-meta{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+.badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px}
+.badge.urgente{background:#fff4e5;color:#c47a00}
+.badge.normal{background:#e8f0fe;color:#1a6ef5}
+.badge.rotina{background:#e8f7ee;color:#1a8c4e}
+.badge.montagem{background:#fff4e5;color:#c47a00}
+.badge.retornado{background:#e8f7ee;color:#1a8c4e}
+.badge.ref{background:#e8f0fe;color:#1a6ef5}
+.badge.auto{background:#e8f7ee;color:#1a8c4e}
+.card-date{font-size:11px;color:#6b7a99}
+.card-title{font-size:14px;font-weight:500;color:#1a2540;line-height:1.4}
+.card-desc{font-size:12px;color:#4a5470;margin-top:4px;line-height:1.5}
+.card-stats{font-size:12px;color:#6b7a99;margin-top:4px}
+.card-stats strong{color:#1a2540}
+.card-stats-row{display:flex;gap:16px;font-size:12px;margin-top:6px;flex-wrap:wrap}
+.card-stats-row .item{color:#6b7a99}
+.card-stats-row .item strong{color:#1a2540}
+.card-stats-row .item.b2 strong{color:#1a6ef5}
+.card-stats-row .item.matriz strong{color:#e09030}
+.card.done-card .card-title{text-decoration:line-through;color:#b0b9cc}
+.card-btns{display:flex;gap:4px;flex-shrink:0}
+.ibtn{width:28px;height:28px;border:1px solid #e2e7f0;border-radius:6px;background:none;color:#6b7a99;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s}
+.ibtn:hover{background:#f4f6fb;color:#1a2540;border-color:#c8d0e0}
+.ibtn.ok:hover{background:#e8f7ee;color:#1a8c4e;border-color:#b6e6cb}
+.ibtn.del:hover{background:#fff0f0;color:#d94040;border-color:#f0baba}
+.ibtn.back:hover{background:#e8f0fe;color:#1a6ef5;border-color:#b3ccfa}
+
+/* CHECKLIST */
+.cl{border-top:1px solid #f0f3f9;margin-top:10px;padding-top:10px}
+.cl-item{display:flex;align-items:center;gap:8px;padding:3px 0}
+.cl-item input[type=checkbox]{accent-color:#1a6ef5;width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.cl-label{flex:1;font-size:13px;color:#2a3450;cursor:pointer}
+.cl-label.ck{text-decoration:line-through;color:#b0b9cc}
+.cl-rm{width:18px;height:18px;border:none;background:none;color:#c8d0e0;cursor:pointer;font-size:11px;border-radius:4px;display:flex;align-items:center;justify-content:center;opacity:0;transition:all .15s}
+.cl-item:hover .cl-rm{opacity:1}
+.cl-rm:hover{background:#fff0f0;color:#d94040}
+.prog-wrap{margin-top:8px}
+.prog-info{display:flex;justify-content:space-between;font-size:11px;color:#6b7a99;margin-bottom:4px}
+.prog-bg{background:#f0f3f9;border-radius:10px;height:3px;overflow:hidden}
+.prog-fill{height:3px;border-radius:10px;background:#1a6ef5;transition:width .3s}
+.prog-fill.full{background:#1a8c4e}
+.step-row{display:flex;gap:6px;margin-top:8px}
+.step-inp{flex:1;border:1px solid #e2e7f0;border-radius:6px;padding:6px 10px;font-size:12px;font-family:'Inter',sans-serif;color:#1a2540;background:#f8faff;outline:none;transition:border .15s}
+.step-inp:focus{border-color:#1a6ef5}
+.step-inp::placeholder{color:#8a94a8}
+.btn-step{border:1px solid #dde2ee;border-radius:6px;background:none;padding:6px 10px;font-size:12px;font-family:'Inter',sans-serif;color:#3a4560;cursor:pointer;white-space:nowrap;transition:all .15s}
+.btn-step:hover{background:#f0f3f9}
+.done-tag{font-size:11px;color:#1a8c4e;background:#e8f7ee;padding:2px 7px;border-radius:4px;font-weight:500}
+.div-tag{font-size:11px;color:#b07020;background:#fff4e0;padding:2px 7px;border-radius:4px;font-weight:500}
+
+/* TABLE */
+.table-wrap{background:#fff;border:1px solid #e2e7f0;border-radius:12px;overflow:hidden}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:10px 16px;font-size:11px;font-weight:600;color:#6b7a99;text-transform:uppercase;letter-spacing:.4px;text-align:left;border-bottom:1px solid #e2e7f0}
+.tbl td{padding:11px 16px;font-size:13px;color:#1a2540;border-bottom:1px solid #f0f3f9}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td.ref-cell{font-weight:600;color:#1a6ef5}
+.tbl td.actions{display:flex;gap:4px;justify-content:flex-end}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 20px;color:#6b7a99;font-size:13px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,18,40,.45);backdrop-filter:blur(2px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:#fff;border:1px solid #e2e7f0;border-radius:14px;padding:24px;width:100%;max-width:480px;margin:20px;transform:translateY(8px);transition:transform .2s}
+.modal-overlay.show .modal{transform:translateY(0)}
+.modal h3{font-size:14px;font-weight:600;margin-bottom:16px;color:#1a2540}
+.modal label{font-size:11px;font-weight:600;color:#6b7a99;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.modal input,.modal select,.modal textarea{width:100%;border:1px solid #dde2ee;border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;color:#1a2540;background:#f8faff;outline:none;margin-bottom:12px;transition:border .15s}
+.modal textarea{resize:none;height:80px}
+.modal input:focus,.modal select:focus,.modal textarea:focus{border-color:#1a6ef5;background:#fff}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.btn-cancel{background:none;border:1px solid #dde2ee;border-radius:8px;padding:8px 16px;font-size:13px;font-family:'Inter',sans-serif;color:#3a4560;cursor:pointer;transition:all .15s}
+.btn-cancel:hover{background:#f4f6fb}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;background:#1a2540;color:#fff;font-size:12px;padding:10px 16px;border-radius:8px;opacity:0;transform:translateY(6px);transition:all .2s;pointer-events:none;z-index:300;max-width:340px}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* DARK MODE */
+body.dark{background:#0d1117;color:#dde3ef}
+body.dark .sidebar{background:#161b27;border-color:#21293d}
+body.dark .brand h1{color:#dde3ef}
+body.dark .brand p{color:#3d4f6a}
+body.dark .nav-item{color:#a0aec0}
+body.dark .nav-item:hover{background:#1c2333;color:#e2e8f5}
+body.dark .nav-item.active{background:#1a2d50;color:#7ab4f8}
+body.dark .nav-item .n-badge{background:#21293d;color:#a0aec0}
+body.dark .nav-item.active .n-badge{background:#1a6ef5;color:#fff}
+body.dark .theme-btn{border-color:#21293d;color:#a0aec0}
+body.dark .theme-btn:hover{border-color:#4a8ef5;color:#7ab4f8}
+body.dark .topbar h2{color:#dde3ef}
+body.dark .topbar p{color:#8a9ab8}
+body.dark .dash-card,body.dark .dash-section,body.dark .add-box,body.dark .card,body.dark .table-wrap{background:#161b27;border-color:#21293d}
+body.dark .dash-card .dc-label{color:#8a9ab8}
+body.dark .dash-card .dc-value{color:#dde3ef}
+body.dark .dash-card.blue .dc-value{color:#7ab4f8}
+body.dark .dash-card.orange .dc-value{color:#f0a84a}
+body.dark .dash-card.green .dc-value{color:#4ec97a}
+body.dark .dash-card.gray .dc-value{color:#a0aec0}
+body.dark .dash-section h3{color:#dde3ef}
+body.dark .dash-row{border-color:#21293d}
+body.dark .dash-row .dr-title{color:#dde8f8}
+body.dark .dash-row .dr-date,body.dark .dash-empty{color:#8a9ab8}
+body.dark .add-row input,body.dark .add-row select,body.dark .add-row textarea,body.dark .add-grid input,body.dark .add-grid select,body.dark .ret-grid input{background:#0d1117;border-color:#21293d;color:#dde3ef}
+body.dark .add-row input::placeholder,body.dark .add-row textarea::placeholder{color:#5a6b8a}
+body.dark .add-row input:focus,body.dark .add-row textarea:focus,body.dark .add-row select:focus,body.dark .add-grid input:focus,body.dark .add-grid select:focus,body.dark .ret-grid input:focus{border-color:#4a8ef5;background:#161b27}
+body.dark .add-grid .field label,body.dark .ret-grid .field label{color:#8a9ab8}
+body.dark .ret-form-title{color:#dde3ef}
+body.dark .ret-form-sub{color:#8a9ab8}
+body.dark .ret-grid .display{background:#0d1117;border-color:#21293d;color:#8a9ab8}
+body.dark .tabs{border-color:#21293d}
+body.dark .tab{color:#8a9ab8}
+body.dark .tab:hover{color:#e2e8f5}
+body.dark .tab.active{color:#7ab4f8;border-bottom-color:#7ab4f8}
+body.dark .tab-n{background:#21293d;color:#a0aec0}
+body.dark .tab.active .tab-n{background:#1a6ef5;color:#fff}
+body.dark .chip{border-color:#21293d;color:#a0aec0}
+body.dark .chip:hover{border-color:#7ab4f8;color:#7ab4f8}
+body.dark .chip.active{background:#1a6ef5;color:#fff;border-color:#1a6ef5}
+body.dark .card:hover{box-shadow:0 2px 12px rgba(74,142,245,.1);border-color:#2a3a55}
+body.dark .card-title{color:#dde3ef}
+body.dark .card-desc{color:#a0aec0}
+body.dark .card-date,body.dark .card-stats,body.dark .card-stats-row .item{color:#8a9ab8}
+body.dark .card-stats strong,body.dark .card-stats-row .item strong{color:#dde3ef}
+body.dark .card-stats-row .item.b2 strong{color:#7ab4f8}
+body.dark .card-stats-row .item.matriz strong{color:#f0a84a}
+body.dark .card.done-card .card-title{color:#5a6b8a}
+body.dark .badge.urgente{background:#3a2800;color:#f0a84a}
+body.dark .badge.normal,body.dark .badge.ref{background:#0e2040;color:#7ab4f8}
+body.dark .badge.rotina,body.dark .badge.retornado,body.dark .badge.auto{background:#0e2a18;color:#4ec97a}
+body.dark .badge.montagem{background:#3a2800;color:#f0a84a}
+body.dark .ibtn{border-color:#21293d;color:#a0aec0}
+body.dark .ibtn:hover{background:#1c2333;color:#dde3ef;border-color:#2a3a55}
+body.dark .ibtn.ok:hover{background:#0e2a18;color:#4ec97a;border-color:#1a5a3a}
+body.dark .ibtn.del:hover{background:#3a0e0e;color:#e06060;border-color:#5a2020}
+body.dark .ibtn.back:hover{background:#1a2d50;color:#7ab4f8;border-color:#2a4a7a}
+body.dark .cl{border-color:#21293d}
+body.dark .cl-label{color:#dde3ef}
+body.dark .cl-label.ck{color:#5a6b8a}
+body.dark .prog-bg{background:#21293d}
+body.dark .step-inp{background:#0d1117;border-color:#21293d;color:#dde3ef}
+body.dark .step-inp::placeholder{color:#5a6b8a}
+body.dark .step-inp:focus{border-color:#4a8ef5}
+body.dark .btn-step{border-color:#21293d;color:#a0aec0}
+body.dark .btn-step:hover{background:#1c2333}
+body.dark .done-tag{background:#0e2a18;color:#4ec97a}
+body.dark .div-tag{background:#3a2800;color:#f0a84a}
+body.dark .card.div-card.resolved,body.dark .card.ret-card{border-left-color:#4ec97a}
+body.dark .tbl th{color:#8a9ab8;border-color:#21293d}
+body.dark .tbl td{color:#dde3ef;border-color:#21293d}
+body.dark .tbl td.ref-cell{color:#7ab4f8}
+body.dark .modal{background:#161b27;border-color:#21293d}
+body.dark .modal h3{color:#dde3ef}
+body.dark .modal label{color:#8a9ab8}
+body.dark .modal input,body.dark .modal select,body.dark .modal textarea{background:#0d1117;border-color:#21293d;color:#dde3ef}
+body.dark .modal input:focus,body.dark .modal select:focus,body.dark .modal textarea:focus{border-color:#4a8ef5;background:#161b27}
+body.dark .btn-cancel{border-color:#21293d;color:#a0aec0}
+body.dark .btn-cancel:hover{background:#1c2333}
+body.dark .empty{color:#8a9ab8}
+
+/* scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:#dde2ee;border-radius:3px}
+body.dark ::-webkit-scrollbar-thumb{background:#21293d}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <div><h1>BS TOYS</h1><p>Expedição Mbrink</p></div>
+  </div>
+  <button class="nav-item active" id="ni-painel" onclick="goTo('painel')"><span class="icon">📊</span><span>Painel</span></button>
+  <button class="nav-item" id="ni-lems" onclick="goTo('lems')"><span class="icon">📋</span><span>Lembretes</span></button>
+  <button class="nav-item" id="ni-divs" onclick="goTo('divs')"><span class="icon">⚠️</span><span>Divergências</span></button>
+  <button class="nav-item" id="ni-refs" onclick="goTo('refs')"><span class="icon">📦</span><span>Cadastro Refs</span></button>
+  <button class="nav-item" id="ni-estoque" onclick="goTo('estoque')"><span class="icon">🏭</span><span>Estoque Mbrink</span></button>
+  <button class="nav-item" id="ni-mont" onclick="goTo('mont')"><span class="icon">🔧</span><span>Montagem Mbrink</span></button>
+  <div class="sidebar-footer">
+    <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">🌙</span><span id="theme-label">Modo noturno</span></button>
+  </div>
+</div>
+
+<div class="main">
+  <div id="page-painel" class="page active"></div>
+  <div id="page-lems" class="page"></div>
+  <div id="page-divs" class="page"></div>
+  <div id="page-refs" class="page"></div>
+  <div id="page-estoque" class="page"></div>
+  <div id="page-mont" class="page"></div>
+</div>
+
+<!-- MODAL: edit lembrete -->
+<div class="modal-overlay" id="modal-lem" onclick="closeModal('modal-lem',event)">
+  <div class="modal">
+    <h3>Editar lembrete</h3>
+    <label>Título</label><input type="text" id="m-lem-title"/>
+    <label>Prioridade</label><select id="m-lem-prio"><option value="urgente">Urgente</option><option value="normal">Normal</option><option value="rotina">Rotina</option></select>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('modal-lem')">Cancelar</button><button class="btn-add" onclick="saveLemEdit()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MODAL: edit div -->
+<div class="modal-overlay" id="modal-div" onclick="closeModal('modal-div',event)">
+  <div class="modal">
+    <h3>Editar divergência</h3>
+    <label>Referência</label><input type="text" id="m-div-ref"/>
+    <label>Descrição</label><textarea id="m-div-desc"></textarea>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('modal-div')">Cancelar</button><button class="btn-add" onclick="saveDivEdit()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MODAL: edit ref -->
+<div class="modal-overlay" id="modal-ref" onclick="closeModal('modal-ref',event)">
+  <div class="modal">
+    <h3>Editar referência</h3>
+    <label>Referência</label><input type="text" id="m-ref-ref"/>
+    <label>Descrição</label><input type="text" id="m-ref-desc"/>
+    <label>Peças por caixa</label><input type="number" id="m-ref-ppc"/>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('modal-ref')">Cancelar</button><button class="btn-add" onclick="saveRefEdit()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MODAL: edit estoque -->
+<div class="modal-overlay" id="modal-est" onclick="closeModal('modal-est',event)">
+  <div class="modal">
+    <h3>Editar movimentação</h3>
+    <label>Referência</label><select id="m-est-ref"></select>
+    <label>Descrição</label><input type="text" id="m-est-desc"/>
+    <label>Caixas <span id="m-est-pcs" style="font-weight:400;color:#6b7a99"></span></label><input type="number" id="m-est-caixas"/>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('modal-est')">Cancelar</button><button class="btn-add" onclick="saveEstEdit()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MODAL: edit montagem -->
+<div class="modal-overlay" id="modal-mont" onclick="closeModal('modal-mont',event)">
+  <div class="modal">
+    <h3>Editar envio</h3>
+    <label>Referência</label><select id="m-mont-ref"></select>
+    <label>Descrição</label><input type="text" id="m-mont-desc"/>
+    <label>Peças enviadas</label><input type="number" id="m-mont-pecas"/>
+    <label>Status</label><select id="m-mont-status"><option value="montagem">Em montagem</option><option value="retornado">Retornado</option></select>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('modal-mont')">Cancelar</button><button class="btn-add" onclick="saveMontEdit()">Salvar</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── STATE ──────────────────────────────────────────────
+const SK = { refs:'bs:refs', lems:'bs:lems', divs:'bs:divs', saida:'bs:saida', b2:'bs:b2', b2out:'bs:b2out', mont:'bs:mont', ret:'bs:ret' };
+const state = { refs:[], lems:[], divs:[], saida:[], b2:[], b2out:[], mont:[], ret:[], page:'painel', lemTab:'open', lemFilter:'all', divTab:'open', estTab:'saida', montTab:'envios', editId:null };
+const uid = () => Date.now() + '-' + Math.random().toString(36).slice(2,5);
+const hoje = () => new Date().toLocaleDateString('pt-BR');
+const PRIO_LBL = { urgente:'Urgente', normal:'Normal', rotina:'Rotina' };
+function sortedRefs() { return [...state.refs].sort((a,b) => a.ref.localeCompare(b.ref)); }
+function refOptions() { return '<option value="">Selecionar...</option>' + sortedRefs().map(r => `<option value="${escapeHtml(r.ref)}">${escapeHtml(r.ref)}</option>`).join(''); }
+function refSelHTML() { return sortedRefs().map(r => `<option value="${escapeHtml(r.ref)}">${escapeHtml(r.ref)}</option>`).join(''); }
+
+// ─── STORAGE ────────────────────────────────────────────
+function loadAll() {
+  Object.keys(SK).forEach(k => {
+    try { const r = localStorage.getItem(SK[k]); if (r) state[k] = JSON.parse(r); } catch {}
+  });
+}
+function save(key) { localStorage.setItem(SK[key], JSON.stringify(state[key])); }
+
+// ─── THEME ──────────────────────────────────────────────
+function toggleTheme() {
+  const dk = document.body.classList.toggle('dark');
+  document.getElementById('theme-icon').textContent = dk ? '☀️' : '🌙';
+  document.getElementById('theme-label').textContent = dk ? 'Modo claro' : 'Modo noturno';
+  localStorage.setItem('bs:theme', dk ? 'dark' : 'light');
+}
+function loadTheme() {
+  if (localStorage.getItem('bs:theme') === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('theme-icon').textContent = '☀️';
+    document.getElementById('theme-label').textContent = 'Modo claro';
+  }
+}
+
+// ─── TOAST ──────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ─── NAV ────────────────────────────────────────────────
+function goTo(page) {
+  state.page = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('ni-' + page).classList.add('active');
+  render(page);
+}
+function renderAll() {
+  ['painel','lems','divs','refs','estoque','mont'].forEach(p => render(p));
+}
+function render(page) {
+  if (page === 'painel')  renderPainel();
+  if (page === 'lems')    renderLems();
+  if (page === 'divs')    renderDivs();
+  if (page === 'refs')    renderRefs();
+  if (page === 'estoque') renderEstoque();
+  if (page === 'mont')    renderMont();
+}
+
+// ─── MODALS ─────────────────────────────────────────────
+function closeModal(id, e) {
+  if (e && e.target !== document.getElementById(id)) return;
+  document.getElementById(id).classList.remove('show');
+  state.editId = null;
+}
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ═══════════════════════════════════════════════════════
+// PAINEL
+// ═══════════════════════════════════════════════════════
+function renderPainel() {
+  const lemsOpen = state.lems.filter(r => !r.done);
+  const divsOpen = state.divs.filter(d => !d.resolved);
+  const montOpen = state.mont.filter(m => m.status === 'montagem');
+  const lemRows = lemsOpen.slice(0, 5).map(r => `
+    <div class="dash-row">
+      <span class="dr-badge badge ${r.prio}">${PRIO_LBL[r.prio]}</span>
+      <span class="dr-title">${escapeHtml(r.title)}</span>
+      <span class="dr-date">${r.created}</span>
+    </div>`).join('') || '<div class="dash-empty">Nenhum lembrete em aberto.</div>';
+  const montRows = montOpen.slice(0, 5).map(m => `
+    <div class="dash-row">
+      <span class="dr-badge badge ref">${escapeHtml(m.ref)}</span>
+      <span class="dr-title">${escapeHtml(m.desc)} · ${m.pecas} pcs</span>
+      <span class="dr-date">${m.data}</span>
+    </div>`).join('') || '<div class="dash-empty">Nenhuma montagem em andamento.</div>';
+  document.getElementById('page-painel').innerHTML = `
+    <div class="topbar"><h2>Painel</h2><p>Visão geral do sistema</p></div>
+    <div class="dash-grid">
+      <div class="dash-card blue"><div class="dc-label">Lembretes abertos</div><div class="dc-value">${lemsOpen.length}</div></div>
+      <div class="dash-card orange"><div class="dc-label">Divergências</div><div class="dc-value">${divsOpen.length}</div></div>
+      <div class="dash-card green"><div class="dc-label">Em montagem</div><div class="dc-value">${montOpen.length}</div></div>
+      <div class="dash-card gray"><div class="dc-label">Refs cadastradas</div><div class="dc-value">${state.refs.length}</div></div>
+    </div>
+    <div class="dash-cols">
+      <div class="dash-section"><h3>Lembretes em aberto</h3>${lemRows}</div>
+      <div class="dash-section"><h3>Montagens em andamento</h3>${montRows}</div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════
+// LEMBRETES
+// ═══════════════════════════════════════════════════════
+function renderLems() {
+  const lemsOpen = state.lems.filter(r => !r.done);
+  const filtered = state.lemFilter === 'all' ? lemsOpen : lemsOpen.filter(r => r.prio === state.lemFilter);
+  const lemsDone = state.lems.filter(r => r.done);
+  const list = state.lemTab === 'open' ? filtered : lemsDone;
+  const isDone = state.lemTab === 'done';
+  const cards = list.length === 0
+    ? `<div class="empty">${isDone ? 'Nenhum concluído.' : 'Nenhum lembrete em aberto.'}</div>`
+    : list.map(r => lemCard(r, isDone)).join('');
+  const filters = state.lemTab === 'open' ? `
+    <div class="filters">
+      <button class="chip ${state.lemFilter==='all'?'active':''}" onclick="setLemFilter('all')">Todos</button>
+      <button class="chip ${state.lemFilter==='urgente'?'active':''}" onclick="setLemFilter('urgente')">Urgente</button>
+      <button class="chip ${state.lemFilter==='normal'?'active':''}" onclick="setLemFilter('normal')">Normal</button>
+      <button class="chip ${state.lemFilter==='rotina'?'active':''}" onclick="setLemFilter('rotina')">Rotina</button>
+    </div>` : '';
+  document.getElementById('page-lems').innerHTML = `
+    <div class="topbar"><h2>Lembretes</h2><p>Processos e tarefas</p></div>
+    <div class="add-box">
+      <div class="add-row">
+        <input type="text" id="new-lem-title" placeholder="Novo lembrete..." onkeydown="if(event.key==='Enter')addLem()"/>
+        <select id="new-lem-prio"><option value="urgente">Urgente</option><option value="normal" selected>Normal</option><option value="rotina">Rotina</option></select>
+        <button class="btn-add" onclick="addLem()">+ Add</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab ${state.lemTab==='open'?'active':''}" onclick="setLemTab('open')">Em aberto</button>
+      <button class="tab ${state.lemTab==='done'?'active':''}" onclick="setLemTab('done')">Concluídos</button>
+    </div>
+    ${filters}
+    ${cards}
+  `;
+}
+function lemCard(r, isDone) {
+  const tot = r.items ? r.items.length : 0;
+  const dn = r.items ? r.items.filter(s => s.done).length : 0;
+  const pct = tot > 0 ? Math.round(dn/tot*100) : 0;
+  const steps = (r.items || []).map(s => `
+    <div class="cl-item">
+      <input type="checkbox" ${s.done?'checked':''} ${isDone?'disabled':''} onchange="toggleStep('${r.id}','${s.id}')"/>
+      <span class="cl-label ${s.done?'ck':''}" onclick="${!isDone?`toggleStep('${r.id}','${s.id}')`:''}">${escapeHtml(s.text)}</span>
+      ${!isDone?`<button class="cl-rm" onclick="removeStep('${r.id}','${s.id}')">✕</button>`:''}
+    </div>`).join('');
+  const prog = tot > 0 ? `<div class="prog-wrap"><div class="prog-info"><span>${dn}/${tot} etapas</span><span>${pct}%</span></div><div class="prog-bg"><div class="prog-fill ${pct===100?'full':''}" style="width:${pct}%"></div></div></div>` : '';
+  const stepRow = !isDone ? `<div class="step-row"><input class="step-inp" id="si-${r.id}" placeholder="Nova etapa..." onkeydown="if(event.key==='Enter')addStep('${r.id}')"/><button class="btn-step" onclick="addStep('${r.id}')">+ Etapa</button></div>` : '';
+  const cl = (tot > 0 || !isDone) ? `<div class="cl">${steps}${stepRow}${prog}</div>` : '';
+  const meta = isDone ? `<span class="done-tag">✓ ${r.closed}</span>` : `<span class="card-date">${r.created}</span>`;
+  const btns = isDone
+    ? `<button class="ibtn back" onclick="restoreLem('${r.id}')" title="Reabrir">↩</button><button class="ibtn del" onclick="delLem('${r.id}')" title="Excluir">✕</button>`
+    : `<button class="ibtn" onclick="openLemEdit('${r.id}')" title="Editar">✏️</button><button class="ibtn ok" onclick="completeLem('${r.id}')" title="Concluir">✓</button><button class="ibtn del" onclick="delLem('${r.id}')" title="Excluir">✕</button>`;
+  return `<div class="card ${isDone?'done-card':''}"><div class="card-row"><div class="card-info"><div class="card-meta"><span class="badge ${r.prio}">${PRIO_LBL[r.prio]}</span>${meta}</div><div class="card-title">${escapeHtml(r.title)}</div></div><div class="card-btns">${btns}</div></div>${cl}</div>`;
+}
+function setLemTab(t) { state.lemTab = t; renderLems(); }
+function setLemFilter(f) { state.lemFilter = f; renderLems(); }
+function addLem() {
+  const title = document.getElementById('new-lem-title').value.trim();
+  if (!title) return toast('Digite o lembrete!');
+  const prio = document.getElementById('new-lem-prio').value;
+  state.lems.unshift({ id:uid(), title, prio, done:false, items:[], created:hoje(), closed:null });
+  save('lems');
+  document.getElementById('new-lem-title').value = '';
+  renderLems();
+  toast('Lembrete adicionado.');
+}
+function completeLem(id) {
+  const r = state.lems.find(r => r.id === id);
+  r.done = true; r.closed = hoje();
+  save('lems'); renderLems(); toast('Concluído!');
+}
+function restoreLem(id) {
+  const r = state.lems.find(r => r.id === id);
+  r.done = false; r.closed = null;
+  save('lems'); renderLems(); toast('Reaberto.');
+}
+function delLem(id) {
+  if (!confirm('Excluir este lembrete?')) return;
+  state.lems = state.lems.filter(r => r.id !== id);
+  save('lems'); renderLems(); toast('Excluído.');
+}
+function openLemEdit(id) {
+  const r = state.lems.find(r => r.id === id);
+  state.editId = id;
+  document.getElementById('m-lem-title').value = r.title;
+  document.getElementById('m-lem-prio').value = r.prio;
+  document.getElementById('modal-lem').classList.add('show');
+  setTimeout(() => document.getElementById('m-lem-title').focus(), 80);
+}
+function saveLemEdit() {
+  const title = document.getElementById('m-lem-title').value.trim();
+  if (!title) return toast('Título não pode estar vazio!');
+  const r = state.lems.find(r => r.id === state.editId);
+  r.title = title;
+  r.prio = document.getElementById('m-lem-prio').value;
+  save('lems');
+  closeModal('modal-lem');
+  renderLems();
+  toast('Atualizado!');
+}
+function addStep(rid) {
+  const inp = document.getElementById('si-' + rid);
+  const text = inp.value.trim();
+  if (!text) return;
+  const r = state.lems.find(r => r.id === rid);
+  if (!r.items) r.items = [];
+  r.items.push({ id:uid(), text, done:false });
+  save('lems'); renderLems();
+}
+function toggleStep(rid, sid) {
+  const r = state.lems.find(r => r.id === rid);
+  const s = r.items.find(s => s.id === sid);
+  s.done = !s.done;
+  save('lems'); renderLems();
+}
+function removeStep(rid, sid) {
+  const r = state.lems.find(r => r.id === rid);
+  r.items = r.items.filter(s => s.id !== sid);
+  save('lems'); renderLems();
+}
+
+// ═══════════════════════════════════════════════════════
+// DIVERGÊNCIAS
+// ═══════════════════════════════════════════════════════
+function renderDivs() {
+  const divsOpen = state.divs.filter(d => !d.resolved);
+  const divsDone = state.divs.filter(d => d.resolved);
+  const list = state.divTab === 'open' ? divsOpen : divsDone;
+  const isResolved = state.divTab === 'done';
+  const cards = list.length === 0
+    ? `<div class="empty">${isResolved ? 'Nenhuma resolvida.' : 'Nenhuma divergência em aberto.'}</div>`
+    : list.map(d => divCard(d, isResolved)).join('');
+  document.getElementById('page-divs').innerHTML = `
+    <div class="topbar"><h2>Divergências</h2><p>Referências com problemas</p></div>
+    <div class="add-box">
+      <div class="add-row">
+        <input type="text" id="new-div-ref" placeholder="Referência (ex: REF-1042)" onkeydown="if(event.key==='Enter')document.getElementById('new-div-desc').focus()"/>
+      </div>
+      <div class="add-row">
+        <textarea id="new-div-desc" placeholder="Descreva a divergência..."></textarea>
+        <button class="btn-add" onclick="addDiv()" style="align-self:flex-end">+ Add</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab ${state.divTab==='open'?'active':''}" onclick="setDivTab('open')">Em aberto</button>
+      <button class="tab ${state.divTab==='done'?'active':''}" onclick="setDivTab('done')">Resolvidas</button>
+    </div>
+    ${cards}
+  `;
+}
+function divCard(d, isResolved) {
+  const meta = isResolved
+    ? `<span class="done-tag">✓ Resolvido em ${d.closedAt}</span>`
+    : `<span class="div-tag">⚠ Em aberto</span><span class="card-date">${d.created}</span>`;
+  const btns = isResolved
+    ? `<button class="ibtn back" onclick="restoreDiv('${d.id}')" title="Reabrir">↩</button><button class="ibtn del" onclick="delDiv('${d.id}')" title="Excluir">✕</button>`
+    : `<button class="ibtn" onclick="openDivEdit('${d.id}')" title="Editar">✏️</button><button class="ibtn ok" onclick="resolveDiv('${d.id}')" title="Resolver">✓</button><button class="ibtn del" onclick="delDiv('${d.id}')" title="Excluir">✕</button>`;
+  return `<div class="card div-card ${isResolved?'resolved':''}"><div class="card-row"><div class="card-info"><div class="card-meta">${meta}</div><div class="card-title">${escapeHtml(d.ref)}</div><div class="card-desc">${escapeHtml(d.desc)}</div></div><div class="card-btns">${btns}</div></div></div>`;
+}
+function setDivTab(t) { state.divTab = t; renderDivs(); }
+function addDiv() {
+  const ref = document.getElementById('new-div-ref').value.trim();
+  const desc = document.getElementById('new-div-desc').value.trim();
+  if (!ref) return toast('Digite a referência!');
+  if (!desc) return toast('Descreva a divergência!');
+  state.divs.unshift({ id:uid(), ref, desc, resolved:false, created:hoje(), closedAt:null });
+  save('divs');
+  document.getElementById('new-div-ref').value = '';
+  document.getElementById('new-div-desc').value = '';
+  renderDivs(); toast('Registrado!');
+}
+function resolveDiv(id) {
+  const d = state.divs.find(d => d.id === id);
+  d.resolved = true; d.closedAt = hoje();
+  save('divs'); renderDivs(); toast('Resolvido!');
+}
+function restoreDiv(id) {
+  const d = state.divs.find(d => d.id === id);
+  d.resolved = false; d.closedAt = null;
+  save('divs'); renderDivs(); toast('Reaberto.');
+}
+function delDiv(id) {
+  if (!confirm('Excluir esta divergência?')) return;
+  state.divs = state.divs.filter(d => d.id !== id);
+  save('divs'); renderDivs(); toast('Excluído.');
+}
+function openDivEdit(id) {
+  const d = state.divs.find(d => d.id === id);
+  state.editId = id;
+  document.getElementById('m-div-ref').value = d.ref;
+  document.getElementById('m-div-desc').value = d.desc;
+  document.getElementById('modal-div').classList.add('show');
+  setTimeout(() => document.getElementById('m-div-ref').focus(), 80);
+}
+function saveDivEdit() {
+  const ref = document.getElementById('m-div-ref').value.trim();
+  const desc = document.getElementById('m-div-desc').value.trim();
+  if (!ref || !desc) return toast('Preencha todos os campos!');
+  const d = state.divs.find(d => d.id === state.editId);
+  d.ref = ref; d.desc = desc;
+  save('divs');
+  closeModal('modal-div');
+  renderDivs();
+  toast('Atualizado!');
+}
+
+// ═══════════════════════════════════════════════════════
+// CADASTRO REFS
+// ═══════════════════════════════════════════════════════
+function renderRefs() {
+  const table = state.refs.length === 0
+    ? '<div class="empty">Nenhuma referência cadastrada.</div>'
+    : `<div class="table-wrap"><table class="tbl">
+        <thead><tr><th>Referência</th><th>Descrição</th><th>Peças/Caixa</th><th></th></tr></thead>
+        <tbody>${sortedRefs().map(r => `
+          <tr>
+            <td class="ref-cell">${escapeHtml(r.ref)}</td>
+            <td>${escapeHtml(r.desc)}</td>
+            <td>${r.ppc} pcs/cx</td>
+            <td class="actions">
+              <button class="ibtn" onclick="openRefEdit('${r.id}')" title="Editar">✏️</button>
+              <button class="ibtn del" onclick="delRef('${r.id}')" title="Excluir">✕</button>
+            </td>
+          </tr>`).join('')}
+        </tbody></table></div>`;
+  document.getElementById('page-refs').innerHTML = `
+    <div class="topbar"><h2>Cadastro de Referências</h2><p>Base para cálculo de peças por caixas</p></div>
+    <div class="add-box">
+      <div class="add-grid">
+        <div class="field"><label>Referência</label><input type="text" id="new-ref-ref" placeholder="Ex: REF-1042"/></div>
+        <div class="field"><label>Descrição</label><input type="text" id="new-ref-desc" placeholder="Nome do produto"/></div>
+        <div class="field"><label>Peças/Caixa</label><input type="number" id="new-ref-ppc" placeholder="Ex: 24"/></div>
+        <button class="btn-add" onclick="addRef()">+ Add</button>
+      </div>
+    </div>
+    ${table}
+  `;
+}
+function addRef() {
+  const ref = document.getElementById('new-ref-ref').value.trim();
+  const desc = document.getElementById('new-ref-desc').value.trim();
+  const ppc = document.getElementById('new-ref-ppc').value;
+  if (!ref || !desc || !ppc) return toast('Preencha todos os campos!');
+  if (state.refs.find(r => r.ref.toLowerCase() === ref.toLowerCase())) return toast('Ref. já cadastrada!');
+  state.refs.unshift({ id:uid(), ref:ref.toUpperCase(), desc, ppc:Number(ppc) });
+  save('refs');
+  document.getElementById('new-ref-ref').value = '';
+  document.getElementById('new-ref-desc').value = '';
+  document.getElementById('new-ref-ppc').value = '';
+  renderRefs(); toast('Ref. cadastrada!');
+}
+function delRef(id) {
+  if (!confirm('Excluir esta referência?')) return;
+  state.refs = state.refs.filter(r => r.id !== id);
+  save('refs'); renderRefs(); toast('Excluído.');
+}
+function openRefEdit(id) {
+  const r = state.refs.find(r => r.id === id);
+  state.editId = id;
+  document.getElementById('m-ref-ref').value = r.ref;
+  document.getElementById('m-ref-desc').value = r.desc;
+  document.getElementById('m-ref-ppc').value = r.ppc;
+  document.getElementById('modal-ref').classList.add('show');
+  setTimeout(() => document.getElementById('m-ref-ref').focus(), 80);
+}
+function saveRefEdit() {
+  const ref = document.getElementById('m-ref-ref').value.trim();
+  const desc = document.getElementById('m-ref-desc').value.trim();
+  const ppc = document.getElementById('m-ref-ppc').value;
+  if (!ref || !desc || !ppc) return toast('Preencha todos os campos!');
+  const r = state.refs.find(r => r.id === state.editId);
+  r.ref = ref.toUpperCase(); r.desc = desc; r.ppc = Number(ppc);
+  save('refs');
+  closeModal('modal-ref');
+  renderRefs();
+  toast('Atualizado!');
+}
+
+// ═══════════════════════════════════════════════════════
+// ESTOQUE MBRINK
+// ═══════════════════════════════════════════════════════
+function renderEstoque() {
+  const refOpts = refOptions();
+
+  let content = '';
+  if (state.estTab === 'saida' || state.estTab === 'b2') {
+    const lista = state.estTab === 'saida' ? state.saida : state.b2;
+    const cards = lista.length === 0
+      ? '<div class="empty">Nenhuma movimentação registrada.</div>'
+      : lista.map(item => estCard(item)).join('');
+    content = `
+      <div class="add-box">
+        <div class="add-grid">
+          <div class="field"><label>Referência</label><select id="new-est-ref" onchange="onEstRefChange()">${refOpts}</select></div>
+          <div class="field"><label>Descrição</label><input type="text" id="new-est-desc" placeholder="Auto ao selecionar ref."/></div>
+          <div class="field"><label id="lbl-est-caixas">Caixas</label><input type="number" id="new-est-caixas" placeholder="Qtd." oninput="updateEstPecas()"/></div>
+          <button class="btn-add" onclick="addEst()">+ Add</button>
+        </div>
+      </div>${cards}`;
+  } else if (state.estTab === 'saldo') {
+    content = renderSaldoB2();
+  } else {
+    content = renderBaixaB2(refOpts);
+  }
+
+  document.getElementById('page-estoque').innerHTML = `
+    <div class="topbar"><h2>Estoque Mbrink</h2><p>Movimentações de saída, entrada e estoque B2</p></div>
+    <div class="tabs">
+      <button class="tab ${state.estTab==='saida'?'active':''}" onclick="setEstTab('saida')">Saída → Matriz</button>
+      <button class="tab ${state.estTab==='b2'?'active':''}" onclick="setEstTab('b2')">Entrada B2</button>
+      <button class="tab ${state.estTab==='saldo'?'active':''}" onclick="setEstTab('saldo')">Estoque B2</button>
+      <button class="tab ${state.estTab==='baixa'?'active':''}" onclick="setEstTab('baixa')">Baixa B2</button>
+    </div>
+    ${content}
+  `;
+}
+function renderSaldoB2() {
+  const saldo = {};
+  state.b2.forEach(e => {
+    if (!saldo[e.ref]) saldo[e.ref] = { ref:e.ref, desc:e.desc, entCx:0, entPcs:0, saiCx:0, saiPcs:0 };
+    saldo[e.ref].entCx += e.caixas; saldo[e.ref].entPcs += e.pecas;
+  });
+  state.b2out.forEach(e => {
+    if (!saldo[e.ref]) saldo[e.ref] = { ref:e.ref, desc:e.desc, entCx:0, entPcs:0, saiCx:0, saiPcs:0 };
+    saldo[e.ref].saiCx += e.caixas; saldo[e.ref].saiPcs += e.pecas;
+  });
+  const rows = Object.values(saldo).filter(s => (s.entCx - s.saiCx) !== 0 || s.entCx > 0).sort((a,b) => a.ref.localeCompare(b.ref));
+  const totalCx = rows.reduce((a,s) => a + s.entCx - s.saiCx, 0);
+  const totalPcs = rows.reduce((a,s) => a + s.entPcs - s.saiPcs, 0);
+  if (rows.length === 0) return '<div class="empty">Nenhum saldo registrado.</div>';
+  return `<div class="table-wrap"><table class="tbl">
+    <thead><tr><th>Ref.</th><th>Descrição</th><th>Entr.</th><th>Saídas</th><th>Saldo cx</th><th>Saldo pcs</th></tr></thead>
+    <tbody>${rows.map(s => {
+      const sCx = s.entCx - s.saiCx;
+      const sPcs = s.entPcs - s.saiPcs;
+      const cor = sCx <= 0 ? 'color:#d94040' : '';
+      return `<tr>
+        <td class="ref-cell">${escapeHtml(s.ref)}</td>
+        <td>${escapeHtml(s.desc)}</td>
+        <td>${s.entCx} cx</td>
+        <td>${s.saiCx} cx</td>
+        <td style="font-weight:600;${cor}">${sCx}</td>
+        <td style="font-weight:600;${cor}">${sPcs}</td>
+      </tr>`;
+    }).join('')}
+    <tr style="border-top:2px solid #e2e7f0"><td colspan="4" style="font-weight:600;text-align:right">Total</td><td style="font-weight:700">${totalCx}</td><td style="font-weight:700">${totalPcs}</td></tr>
+    </tbody></table></div>`;
+}
+function renderBaixaB2(refOpts) {
+  const outCards = state.b2out.length === 0
+    ? '<div class="empty" style="padding:20px">Nenhuma baixa registrada.</div>'
+    : state.b2out.map(item => `<div class="card" style="padding:10px 14px;margin-bottom:6px"><div class="card-row"><div class="card-info">
+        <div class="card-meta"><span class="badge ref">${escapeHtml(item.ref)}</span><span class="card-date">${item.data}</span></div>
+        <div style="font-size:13px;color:inherit">${item.caixas} cx / ${item.pecas} pcs${item.obs ? ' — '+escapeHtml(item.obs) : ''}</div>
+      </div><div class="card-btns">
+        <button class="ibtn del" onclick="delB2Out('${item.id}')" title="Excluir">✕</button>
+      </div></div></div>`).join('');
+  return `
+    <div class="add-box">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">Dar baixa no B2</div>
+      <div class="add-grid" style="grid-template-columns:1fr 1fr 2fr auto">
+        <div class="field"><label>Referência</label><select id="new-b2out-ref" onchange="onB2OutRefChange()">${refOpts}</select></div>
+        <div class="field"><label id="lbl-b2out-pcs">Qtd. caixas</label><input type="number" id="new-b2out-cx" placeholder="Qtd." oninput="updateB2OutPecas()"/></div>
+        <div class="field"><label>Observação</label><input type="text" id="new-b2out-obs" placeholder="Motivo (opcional)"/></div>
+        <button class="btn-add" onclick="addB2Out()">− Baixa</button>
+      </div>
+    </div>
+    ${outCards}
+  `;
+}
+function estCard(item) {
+  const autoBadge = item.auto ? '<span class="badge auto">auto</span>' : '';
+  return `<div class="card"><div class="card-row"><div class="card-info">
+    <div class="card-meta"><span class="badge ref">${escapeHtml(item.ref)}</span>${autoBadge}<span class="card-date">${item.data}</span></div>
+    <div class="card-title">${escapeHtml(item.desc)}</div>
+    <div class="card-stats">${item.caixas} cx → <strong>${item.pecas} peças</strong></div>
+  </div><div class="card-btns">
+    <button class="ibtn" onclick="openEstEdit('${item.id}')" title="Editar">✏️</button>
+    <button class="ibtn del" onclick="delEst('${item.id}')" title="Excluir">✕</button>
+  </div></div></div>`;
+}
+function setEstTab(t) { state.estTab = t; renderEstoque(); }
+function onEstRefChange() {
+  const refStr = document.getElementById('new-est-ref').value;
+  const r = state.refs.find(x => x.ref === refStr);
+  document.getElementById('new-est-desc').value = r ? r.desc : '';
+  updateEstPecas();
+}
+function updateEstPecas() {
+  const refStr = document.getElementById('new-est-ref').value;
+  const r = state.refs.find(x => x.ref === refStr);
+  const cx = Number(document.getElementById('new-est-caixas').value || 0);
+  const pcs = r && cx ? cx * r.ppc : 0;
+  document.getElementById('lbl-est-caixas').textContent = pcs > 0 ? `Caixas → ${pcs} pcs` : 'Caixas';
+}
+function addEst() {
+  const refStr = document.getElementById('new-est-ref').value;
+  const desc = document.getElementById('new-est-desc').value.trim();
+  const cx = document.getElementById('new-est-caixas').value;
+  if (!refStr || !cx) return toast('Preencha referência e caixas!');
+  const r = state.refs.find(x => x.ref === refStr);
+  const pecas = Number(cx) * r.ppc;
+  const item = { id:uid(), ref:refStr, desc:desc||r.desc, caixas:Number(cx), pecas, data:hoje(), auto:false };
+  if (state.estTab === 'saida') { state.saida.unshift(item); save('saida'); }
+  else                          { state.b2.unshift(item);    save('b2');    }
+  document.getElementById('new-est-ref').value = '';
+  document.getElementById('new-est-desc').value = '';
+  document.getElementById('new-est-caixas').value = '';
+  document.getElementById('lbl-est-caixas').textContent = 'Caixas';
+  renderEstoque(); toast('Registrado!');
+}
+function delEst(id) {
+  if (!confirm('Excluir esta movimentação?')) return;
+  if (state.estTab === 'saida') { state.saida = state.saida.filter(r => r.id !== id); save('saida'); }
+  else                          { state.b2    = state.b2.filter(r => r.id !== id);    save('b2');    }
+  renderEstoque(); toast('Excluído.');
+}
+function openEstEdit(id) {
+  const list = state.estTab === 'saida' ? state.saida : state.b2;
+  const item = list.find(r => r.id === id);
+  state.editId = id;
+  const sel = document.getElementById('m-est-ref');
+  sel.innerHTML = refSelHTML();
+  sel.value = item.ref;
+  document.getElementById('m-est-desc').value = item.desc;
+  document.getElementById('m-est-caixas').value = item.caixas;
+  updateEstEditPecas();
+  sel.onchange = () => {
+    const r = state.refs.find(x => x.ref === sel.value);
+    if (r) document.getElementById('m-est-desc').value = r.desc;
+    updateEstEditPecas();
+  };
+  document.getElementById('m-est-caixas').oninput = updateEstEditPecas;
+  document.getElementById('modal-est').classList.add('show');
+}
+function updateEstEditPecas() {
+  const refStr = document.getElementById('m-est-ref').value;
+  const r = state.refs.find(x => x.ref === refStr);
+  const cx = Number(document.getElementById('m-est-caixas').value || 0);
+  const pcs = r && cx ? cx * r.ppc : 0;
+  document.getElementById('m-est-pcs').textContent = pcs > 0 ? `→ ${pcs} pcs` : '';
+}
+function saveEstEdit() {
+  const refStr = document.getElementById('m-est-ref').value;
+  const desc = document.getElementById('m-est-desc').value.trim();
+  const cx = Number(document.getElementById('m-est-caixas').value);
+  if (!refStr || !cx) return toast('Preencha todos os campos!');
+  const r = state.refs.find(x => x.ref === refStr);
+  const list = state.estTab === 'saida' ? state.saida : state.b2;
+  const item = list.find(r => r.id === state.editId);
+  item.ref = refStr; item.desc = desc; item.caixas = cx; item.pecas = cx * (r?.ppc || 0);
+  save(state.estTab === 'saida' ? 'saida' : 'b2');
+  closeModal('modal-est');
+  renderEstoque();
+  toast('Atualizado!');
+}
+// B2 baixa
+function onB2OutRefChange() {
+  updateB2OutPecas();
+}
+function updateB2OutPecas() {
+  const refStr = document.getElementById('new-b2out-ref')?.value;
+  const r = state.refs.find(x => x.ref === refStr);
+  const cx = Number(document.getElementById('new-b2out-cx')?.value || 0);
+  const pcs = r && cx ? cx * r.ppc : 0;
+  const lbl = document.getElementById('lbl-b2out-pcs');
+  if (lbl) lbl.textContent = pcs > 0 ? `Qtd. caixas → ${pcs} pcs` : 'Qtd. caixas';
+}
+function addB2Out() {
+  const refStr = document.getElementById('new-b2out-ref').value;
+  const cx = Number(document.getElementById('new-b2out-cx').value);
+  const obs = document.getElementById('new-b2out-obs').value.trim();
+  if (!refStr || !cx) return toast('Preencha ref. e caixas!');
+  const r = state.refs.find(x => x.ref === refStr);
+  // check saldo
+  const entCx = state.b2.filter(e => e.ref === refStr).reduce((a,e) => a + e.caixas, 0);
+  const saiCx = state.b2out.filter(e => e.ref === refStr).reduce((a,e) => a + e.caixas, 0);
+  if (cx > (entCx - saiCx)) return toast(`Saldo insuficiente! Disponível: ${entCx - saiCx} cx`);
+  const pecas = cx * r.ppc;
+  state.b2out.unshift({ id:uid(), ref:refStr, desc:r.desc, caixas:cx, pecas, data:hoje(), obs });
+  save('b2out');
+  document.getElementById('new-b2out-ref').value = '';
+  document.getElementById('new-b2out-cx').value = '';
+  document.getElementById('new-b2out-obs').value = '';
+  renderEstoque(); toast('Baixa registrada!');
+}
+function delB2Out(id) {
+  if (!confirm('Excluir esta baixa?')) return;
+  state.b2out = state.b2out.filter(r => r.id !== id);
+  save('b2out');
+  renderEstoque(); toast('Excluído.');
+}
+
+// ═══════════════════════════════════════════════════════
+// MONTAGEM MBRINK
+// ═══════════════════════════════════════════════════════
+function renderMont() {
+  const refOpts = refOptions();
+  const montando = state.mont.filter(m => (m.pecas - (m.pecasRet||0)) > 0).sort((a,b) => a.ref.localeCompare(b.ref));
+
+  let tabContent = '';
+  if (state.montTab === 'envios') {
+    const envioCards = state.mont.length === 0
+      ? '<div class="empty">Nenhum envio registrado.</div>'
+      : state.mont.map(item => montCard(item)).join('');
+    tabContent = `
+      <div class="add-box">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">Registrar envio para montagem</div>
+        <div class="add-grid" style="margin-top:4px">
+          <div class="field"><label>Referência</label><select id="new-mont-ref" onchange="onMontRefChange()">${refOpts}</select></div>
+          <div class="field"><label>Descrição</label><input type="text" id="new-mont-desc" placeholder="Auto ao selecionar ref."/></div>
+          <div class="field"><label>Peças enviadas</label><input type="number" id="new-mont-pecas" placeholder="Qtd."/></div>
+          <button class="btn-add" onclick="addEnvio()">+ Add</button>
+        </div>
+      </div>${envioCards}`;
+  } else if (state.montTab === 'montando') {
+    if (montando.length === 0) {
+      tabContent = '<div class="empty">Nenhuma referência em montagem.</div>';
+    } else {
+      tabContent = `<div class="table-wrap"><table class="tbl">
+        <thead><tr><th>Ref.</th><th>Descrição</th><th>Enviado</th><th>Retornado</th><th>Restante</th><th>Data envio</th></tr></thead>
+        <tbody>${montando.map(m => {
+          const ret = m.pecasRet || 0;
+          const rest = m.pecas - ret;
+          return `<tr>
+            <td class="ref-cell">${escapeHtml(m.ref)}</td>
+            <td>${escapeHtml(m.desc)}</td>
+            <td>${m.pecas} pcs</td>
+            <td>${ret} pcs</td>
+            <td style="font-weight:600">${rest} pcs</td>
+            <td style="color:#6b7a99">${m.data}</td>
+          </tr>`;
+        }).join('')}</tbody></table></div>`;
+    }
+  } else {
+    const retCards = state.ret.length === 0
+      ? '<div class="empty">Nenhum retorno registrado.</div>'
+      : state.ret.map(item => retCard(item)).join('');
+    tabContent = `
+      <div class="add-box">
+        <div style="font-size:13px;font-weight:600;margin-bottom:3px">Registrar retorno</div>
+        <div style="font-size:11px;color:#6b7a99;margin-bottom:12px">Atualiza estoque B2, Matriz e desconta da montagem automaticamente.</div>
+        <div class="add-row" style="margin-bottom:10px">
+          <div class="field" style="flex:1;display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#6b7a99;text-transform:uppercase;letter-spacing:.4px">Referência</label>
+            <select id="new-ret-ref" onchange="onRetRefChange()" style="width:100%;border:1px solid #dde2ee;border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;color:inherit;background:#f8faff;outline:none;cursor:pointer">${refOpts}</select>
+          </div>
+          <div class="field" style="flex:2;display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#6b7a99;text-transform:uppercase;letter-spacing:.4px">Descrição</label>
+            <input type="text" id="new-ret-desc" placeholder="Auto ao selecionar ref." style="width:100%;border:1px solid #dde2ee;border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;color:inherit;background:#f8faff;outline:none"/>
+          </div>
+        </div>
+        <div class="ret-grid">
+          <div class="field"><label id="lbl-ret-total">Total caixas</label><input type="number" id="new-ret-cx" placeholder="Qtd." oninput="updateRetCalc()"/></div>
+          <div class="field"><label id="lbl-ret-b2">Caixas → B2</label><input type="number" id="new-ret-cx-b2" placeholder="Qtd." oninput="updateRetCalc()"/></div>
+          <div class="field"><label id="lbl-ret-mat">Caixas → Matriz</label><div class="display" id="ret-mat-display">0 cx — 0 pcs</div></div>
+        </div>
+        <button class="btn-add full" onclick="addRetorno()">✓ Registrar retorno</button>
+      </div>${retCards}`;
+  }
+
+  document.getElementById('page-mont').innerHTML = `
+    <div class="topbar"><h2>Montagem Mbrink</h2><p>Controle de envio e retorno da montagem</p></div>
+    <div class="tabs">
+      <button class="tab ${state.montTab==='envios'?'active':''}" onclick="setMontTab('envios')">Envios</button>
+      <button class="tab ${state.montTab==='montando'?'active':''}" onclick="setMontTab('montando')">Montando</button>
+      <button class="tab ${state.montTab==='ret'?'active':''}" onclick="setMontTab('ret')">Retornos</button>
+    </div>
+    ${tabContent}
+  `;
+}
+function montCard(item) {
+  const ret = item.pecasRet || 0;
+  const rest = item.pecas - ret;
+  const statusLabel = rest <= 0 ? 'Retornado' : 'Em montagem';
+  const statusClass = rest <= 0 ? 'retornado' : 'montagem';
+  const statsText = ret > 0 ? `${item.pecas} enviadas · ${ret} retornadas · ${rest} restante` : `${item.pecas} peças enviadas`;
+  return `<div class="card"><div class="card-row"><div class="card-info">
+    <div class="card-meta"><span class="badge ref">${escapeHtml(item.ref)}</span><span class="badge ${statusClass}">${statusLabel}</span><span class="card-date">${item.data}</span></div>
+    <div class="card-title">${escapeHtml(item.desc)}</div>
+    <div class="card-stats">${statsText}</div>
+  </div><div class="card-btns">
+    <button class="ibtn" onclick="openMontEdit('${item.id}')" title="Editar">✏️</button>
+    <button class="ibtn del" onclick="delMont('${item.id}')" title="Excluir">✕</button>
+  </div></div></div>`;
+}
+function retCard(item) {
+  return `<div class="card ret-card"><div class="card-row"><div class="card-info">
+    <div class="card-meta"><span class="badge ref">${escapeHtml(item.ref)}</span><span class="card-date">${item.data}</span></div>
+    <div class="card-title">${escapeHtml(item.desc)}</div>
+    <div class="card-stats-row">
+      <span class="item">Total: <strong>${item.caixas} cx / ${item.pecas} pcs</strong></span>
+      <span class="item b2">B2: <strong>${item.caixasB2} cx / ${item.pecasB2} pcs</strong></span>
+      <span class="item matriz">Matriz: <strong>${item.caixasMat} cx / ${item.pecasMat} pcs</strong></span>
+    </div>
+  </div><div class="card-btns">
+    <button class="ibtn back" onclick="estornarRet('${item.id}')" title="Estornar">↩</button>
+    <button class="ibtn del" onclick="delRet('${item.id}')" title="Excluir">✕</button>
+  </div></div></div>`;
+}
+function setMontTab(t) { state.montTab = t; renderMont(); }
+function onMontRefChange() {
+  const refStr = document.getElementById('new-mont-ref').value;
+  const r = state.refs.find(x => x.ref === refStr);
+  document.getElementById('new-mont-desc').value = r ? r.desc : '';
+}
+function onRetRefChange() {
+  const refStr = document.getElementById('new-ret-ref').value;
+  const r = state.refs.find(x => x.ref === refStr);
+  document.getElementById('new-ret-desc').value = r ? r.desc : '';
+  updateRetCalc();
+}
+function updateRetCalc() {
+  const refStr = document.getElementById('new-ret-ref').value;
+  const r = state.refs.find(x => x.ref === refStr);
+  const cx = Number(document.getElementById('new-ret-cx').value || 0);
+  const cxB2 = Number(document.getElementById('new-ret-cx-b2').value || 0);
+  const ppc = r ? r.ppc : 0;
+  const pcsTotal = cx * ppc;
+  const pcsB2 = cxB2 * ppc;
+  const cxMat = Math.max(0, cx - cxB2);
+  const pcsMat = cxMat * ppc;
+  document.getElementById('lbl-ret-total').textContent = pcsTotal > 0 ? `Total caixas → ${pcsTotal} pcs` : 'Total caixas';
+  document.getElementById('lbl-ret-b2').textContent = pcsB2 > 0 ? `Caixas → B2 → ${pcsB2} pcs` : 'Caixas → B2';
+  document.getElementById('lbl-ret-mat').textContent = pcsMat > 0 ? `Caixas → Matriz → ${pcsMat} pcs` : 'Caixas → Matriz';
+  document.getElementById('ret-mat-display').textContent = `${cxMat} cx — ${pcsMat} pcs`;
+}
+function addEnvio() {
+  const refStr = document.getElementById('new-mont-ref').value;
+  const desc = document.getElementById('new-mont-desc').value.trim();
+  const pecas = document.getElementById('new-mont-pecas').value;
+  if (!refStr || !pecas) return toast('Preencha ref. e peças!');
+  const r = state.refs.find(x => x.ref === refStr);
+  state.mont.unshift({ id:uid(), ref:refStr, desc:desc||r.desc, pecas:Number(pecas), pecasRet:0, data:hoje(), status:'montagem' });
+  save('mont');
+  document.getElementById('new-mont-ref').value = '';
+  document.getElementById('new-mont-desc').value = '';
+  document.getElementById('new-mont-pecas').value = '';
+  renderMont(); toast('Enviado para montagem!');
+}
+function addRetorno() {
+  const refStr = document.getElementById('new-ret-ref').value;
+  const desc = document.getElementById('new-ret-desc').value.trim();
+  const cx = Number(document.getElementById('new-ret-cx').value);
+  const cxB2 = Number(document.getElementById('new-ret-cx-b2').value || 0);
+  if (!refStr || !cx) return toast('Preencha ref. e caixas!');
+  if (cxB2 > cx) return toast('B2 não pode ser maior que o total!');
+  const r = state.refs.find(x => x.ref === refStr);
+  const ppc = r.ppc;
+  const pecas = cx * ppc;
+  const cxMat = cx - cxB2;
+  const pcsB2 = cxB2 * ppc;
+  const pcsMat = cxMat * ppc;
+  const finalDesc = desc || r.desc;
+  const data = hoje();
+  // retorno record
+  const retId = uid();
+  state.ret.unshift({ id:retId, ref:refStr, desc:finalDesc, caixas:cx, pecas, caixasB2:cxB2, pecasB2:pcsB2, caixasMat:cxMat, pecasMat:pcsMat, data });
+  save('ret');
+  // auto B2 entry
+  state.b2.unshift({ id:uid(), ref:refStr, desc:finalDesc, caixas:cxB2, pecas:pcsB2, data, auto:true, retId });
+  save('b2');
+  // auto Saída entry
+  state.saida.unshift({ id:uid(), ref:refStr, desc:finalDesc, caixas:cxMat, pecas:pcsMat, data, auto:true, retId });
+  save('saida');
+  // deduct peças from montagem (first matching with remaining)
+  const idx = state.mont.findIndex(m => m.ref === refStr && (m.pecas - (m.pecasRet||0)) > 0);
+  if (idx >= 0) {
+    state.mont[idx].pecasRet = (state.mont[idx].pecasRet || 0) + pecas;
+    if (state.mont[idx].pecasRet >= state.mont[idx].pecas) state.mont[idx].status = 'retornado';
+    save('mont');
+  }
+  // clear form
+  document.getElementById('new-ret-ref').value = '';
+  document.getElementById('new-ret-desc').value = '';
+  document.getElementById('new-ret-cx').value = '';
+  document.getElementById('new-ret-cx-b2').value = '';
+  renderMont();
+  toast('Retorno registrado! Estoque e montagem atualizados.');
+}
+function delMont(id) {
+  if (!confirm('Excluir este envio?')) return;
+  state.mont = state.mont.filter(r => r.id !== id);
+  save('mont'); renderMont(); toast('Excluído.');
+}
+function delRet(id) {
+  if (!confirm('Excluir este retorno? (Movimentações automáticas em Saída/B2 não serão removidas.)')) return;
+  state.ret = state.ret.filter(r => r.id !== id);
+  save('ret'); renderMont(); toast('Excluído.');
+}
+function estornarRet(id) {
+  if (!confirm('Estornar este retorno? Isso vai desfazer tudo: remover entradas do B2 e Matriz, e devolver as peças para montagem.')) return;
+  const ret = state.ret.find(r => r.id === id);
+  if (!ret) return;
+  // remove auto B2 entry linked to this retorno
+  state.b2 = state.b2.filter(e => e.retId !== id);
+  save('b2');
+  // remove auto Saída entry linked to this retorno
+  state.saida = state.saida.filter(e => e.retId !== id);
+  save('saida');
+  // restore peças in montagem
+  const idx = state.mont.findIndex(m => m.ref === ret.ref);
+  if (idx >= 0) {
+    state.mont[idx].pecasRet = Math.max(0, (state.mont[idx].pecasRet || 0) - ret.pecas);
+    if (state.mont[idx].pecasRet < state.mont[idx].pecas) state.mont[idx].status = 'montagem';
+    save('mont');
+  }
+  // remove retorno record
+  state.ret = state.ret.filter(r => r.id !== id);
+  save('ret');
+  renderMont();
+  toast('Retorno estornado! Estoque e montagem restaurados.');
+}
+function openMontEdit(id) {
+  const item = state.mont.find(r => r.id === id);
+  state.editId = id;
+  const sel = document.getElementById('m-mont-ref');
+  sel.innerHTML = refSelHTML();
+  sel.value = item.ref;
+  document.getElementById('m-mont-desc').value = item.desc;
+  document.getElementById('m-mont-pecas').value = item.pecas;
+  document.getElementById('m-mont-status').value = item.status;
+  sel.onchange = () => {
+    const r = state.refs.find(x => x.ref === sel.value);
+    if (r) document.getElementById('m-mont-desc').value = r.desc;
+  };
+  document.getElementById('modal-mont').classList.add('show');
+}
+function saveMontEdit() {
+  const refStr = document.getElementById('m-mont-ref').value;
+  const desc = document.getElementById('m-mont-desc').value.trim();
+  const pecas = Number(document.getElementById('m-mont-pecas').value);
+  const status = document.getElementById('m-mont-status').value;
+  if (!refStr || !desc || !pecas) return toast('Preencha todos os campos!');
+  const item = state.mont.find(r => r.id === state.editId);
+  item.ref = refStr; item.desc = desc; item.pecas = pecas; item.status = status;
+  save('mont');
+  closeModal('modal-mont');
+  renderMont();
+  toast('Atualizado!');
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+loadAll();
+loadTheme();
+renderAll();
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    ['modal-lem','modal-div','modal-ref','modal-est','modal-mont'].forEach(id => {
+      document.getElementById(id).classList.remove('show');
+    });
+    state.editId = null;
+  }
+});
+</script>
+</body>
+</html>
