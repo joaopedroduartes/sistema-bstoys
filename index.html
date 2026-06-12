@@ -269,6 +269,28 @@ body.dark .btn-cancel{border-color:#21293d;color:#a0aec0}
 body.dark .btn-cancel:hover{background:#1c2333}
 body.dark .empty{color:#8a9ab8}
 
+/* search */
+.search-bar{display:flex;gap:8px;margin-bottom:16px}
+.search-inp{flex:1;border:1px solid #dde2ee;border-radius:8px;padding:9px 14px;font-size:13px;font-family:'Inter',sans-serif;color:#1a2540;background:#fff;outline:none;transition:border .15s}
+.search-inp:focus{border-color:#1a6ef5}
+.search-inp::placeholder{color:#8a94a8}
+body.dark .search-inp{background:#0d1117;border-color:#21293d;color:#dde3ef}
+body.dark .search-inp::placeholder{color:#5a6b8a}
+body.dark .search-inp:focus{border-color:#4a8ef5}
+
+/* date input in forms */
+.date-inp{border:1px solid #dde2ee;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Inter',sans-serif;color:#1a2540;background:#f8faff;outline:none;cursor:pointer;transition:border .15s}
+.date-inp:focus{border-color:#1a6ef5;background:#fff}
+body.dark .date-inp{background:#0d1117;border-color:#21293d;color:#dde3ef}
+body.dark .date-inp:focus{border-color:#4a8ef5;background:#161b27}
+
+/* backup */
+.bkp-btns{display:flex;gap:4px;margin-bottom:6px}
+.bkp-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:none;border:1px solid #e2e7f0;border-radius:8px;padding:7px 6px;font-size:11px;font-family:'Inter',sans-serif;color:#3a4560;cursor:pointer;transition:all .15s}
+.bkp-btn:hover{border-color:#1a6ef5;color:#1a6ef5}
+body.dark .bkp-btn{border-color:#21293d;color:#a0aec0}
+body.dark .bkp-btn:hover{border-color:#4a8ef5;color:#7ab4f8}
+
 /* scrollbar */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-thumb{background:#dde2ee;border-radius:3px}
@@ -289,6 +311,12 @@ body.dark ::-webkit-scrollbar-thumb{background:#21293d}
   <button class="nav-item" id="ni-estoque" onclick="goTo('estoque')"><span class="icon">🏭</span><span>Estoque Mbrink</span></button>
   <button class="nav-item" id="ni-mont" onclick="goTo('mont')"><span class="icon">🔧</span><span>Montagem Mbrink</span></button>
   <div class="sidebar-footer">
+    <div class="bkp-btns">
+      <button class="bkp-btn" onclick="exportData()">📥 Exportar</button>
+      <button class="bkp-btn" onclick="document.getElementById('import-file').click()">📤 Importar</button>
+    </div>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)"/>
+    <button class="theme-btn" onclick="syncData()" style="margin-bottom:6px"><span>🔄</span><span>Sincronizar</span></button>
     <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">🌙</span><span id="theme-label">Modo noturno</span></button>
   </div>
 </div>
@@ -369,13 +397,89 @@ function sortedRefs() { return [...state.refs].sort((a,b) => a.ref.localeCompare
 function refOptions() { return '<option value="">Selecionar...</option>' + sortedRefs().map(r => `<option value="${escapeHtml(r.ref)}">${escapeHtml(r.ref)}</option>`).join(''); }
 function refSelHTML() { return sortedRefs().map(r => `<option value="${escapeHtml(r.ref)}">${escapeHtml(r.ref)}</option>`).join(''); }
 
-// ─── STORAGE ────────────────────────────────────────────
-function loadAll() {
-  Object.keys(SK).forEach(k => {
-    try { const r = localStorage.getItem(SK[k]); if (r) state[k] = JSON.parse(r); } catch {}
-  });
+async function syncData() {
+  toast('Sincronizando...');
+  await loadAll();
+  renderAll();
+  goTo(state.page);
+  toast('Dados atualizados!');
 }
-function save(key) { localStorage.setItem(SK[key], JSON.stringify(state[key])); }
+
+// ─── BACKUP ─────────────────────────────────────────────
+function exportData() {
+  const backup = {};
+  KEYS.forEach(k => backup[k] = state[k]);
+  backup._exportDate = new Date().toISOString();
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'bstoys-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Backup exportado!');
+}
+async function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!confirm('Importar vai substituir TODOS os dados atuais. Continuar?')) { event.target.value=''; return; }
+  try {
+    const text = await file.text();
+    const backup = JSON.parse(text);
+    KEYS.forEach(k => { if (Array.isArray(backup[k])) state[k] = backup[k]; });
+    for (const k of KEYS) { await save(k); }
+    renderAll();
+    goTo(state.page);
+    toast('Backup importado com sucesso!');
+  } catch (e) {
+    toast('Erro ao importar: arquivo inválido.');
+  }
+  event.target.value = '';
+}
+
+// ─── BUSCA ──────────────────────────────────────────────
+let searchTerm = '';
+function setSearch(v) { searchTerm = v.toLowerCase().trim(); render(state.page); }
+function matchSearch(item) {
+  if (!searchTerm) return true;
+  const fields = [item.title, item.ref, item.desc, item.descricao, item.obs, item.data, item.created, item.closed, item.closedAt].filter(Boolean);
+  return fields.some(f => String(f).toLowerCase().includes(searchTerm));
+}
+function searchBarHTML() {
+  return '<div class="search-bar"><input class="search-inp" placeholder="Buscar..." value="' + escapeHtml(searchTerm) + '" oninput="setSearch(this.value)"/></div>';
+}
+
+// ─── DATA CUSTOMIZADA ───────────────────────────────────
+function todayISO() { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function fmtDate(iso) { if(!iso) return hoje(); const p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function dateFieldHTML(id) { return '<div class="field"><label>Data</label><input type="date" class="date-inp" id="'+id+'" value="'+todayISO()+'"/></div>'; }
+function getDateVal(id) { const v=document.getElementById(id)?.value; return v ? fmtDate(v) : hoje(); }
+
+// ─── SUPABASE (via REST API) ────────────────────────────
+const SUPA_URL = 'https://sgffpswugeqccgehyhvb.supabase.co/rest/v1';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNnZmZwc3d1Z2VxY2NnZWh5aHZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzUzOTAsImV4cCI6MjA5NjUxMTM5MH0.Ue9FInJClBrZOygkO_1omTG_gmhtQWptF_sHlYPXPyY';
+const SUPA_HEADERS = { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' };
+const KEYS = ['refs','lems','divs','saida','b2','b2out','mont','ret'];
+
+// ─── STORAGE ────────────────────────────────────────────
+async function loadAll() {
+  try {
+    const res = await fetch(SUPA_URL + '/kv_store?select=key,data&key=in.(' + KEYS.join(',') + ')', { headers: SUPA_HEADERS });
+    if (!res.ok) throw new Error(res.statusText);
+    const data = await res.json();
+    if (data) data.forEach(row => { if (state[row.key] !== undefined) state[row.key] = row.data || []; });
+    return;
+  } catch (e) { console.warn('Supabase offline, usando localStorage...', e.message); }
+  KEYS.forEach(k => { try { const r = localStorage.getItem('bs:'+k); if (r) state[k] = JSON.parse(r); } catch {} });
+}
+async function save(key) {
+  localStorage.setItem('bs:'+key, JSON.stringify(state[key]));
+  try {
+    await fetch(SUPA_URL + '/kv_store?on_conflict=key', {
+      method: 'POST', headers: { ...SUPA_HEADERS, 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ key, data: state[key], updated_at: new Date().toISOString() })
+    });
+  } catch (e) { console.warn('Erro Supabase:', e.message); }
+}
 
 // ─── THEME ──────────────────────────────────────────────
 function toggleTheme() {
@@ -404,6 +508,7 @@ function toast(msg) {
 // ─── NAV ────────────────────────────────────────────────
 function goTo(page) {
   state.page = page;
+  searchTerm = '';
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
@@ -472,8 +577,8 @@ function renderPainel() {
 // ═══════════════════════════════════════════════════════
 function renderLems() {
   const lemsOpen = state.lems.filter(r => !r.done);
-  const filtered = state.lemFilter === 'all' ? lemsOpen : lemsOpen.filter(r => r.prio === state.lemFilter);
-  const lemsDone = state.lems.filter(r => r.done);
+  const filtered = lemsOpen.filter(r => (state.lemFilter === 'all' || r.prio === state.lemFilter) && matchSearch(r));
+  const lemsDone = state.lems.filter(r => r.done && matchSearch(r));
   const list = state.lemTab === 'open' ? filtered : lemsDone;
   const isDone = state.lemTab === 'done';
   const cards = list.length === 0
@@ -488,6 +593,7 @@ function renderLems() {
     </div>` : '';
   document.getElementById('page-lems').innerHTML = `
     <div class="topbar"><h2>Lembretes</h2><p>Processos e tarefas</p></div>
+    ${searchBarHTML()}
     <div class="add-box">
       <div class="add-row">
         <input type="text" id="new-lem-title" placeholder="Novo lembrete..." onkeydown="if(event.key==='Enter')addLem()"/>
@@ -593,8 +699,8 @@ function removeStep(rid, sid) {
 // DIVERGÊNCIAS
 // ═══════════════════════════════════════════════════════
 function renderDivs() {
-  const divsOpen = state.divs.filter(d => !d.resolved);
-  const divsDone = state.divs.filter(d => d.resolved);
+  const divsOpen = state.divs.filter(d => !d.resolved && matchSearch(d));
+  const divsDone = state.divs.filter(d => d.resolved && matchSearch(d));
   const list = state.divTab === 'open' ? divsOpen : divsDone;
   const isResolved = state.divTab === 'done';
   const cards = list.length === 0
@@ -602,6 +708,7 @@ function renderDivs() {
     : list.map(d => divCard(d, isResolved)).join('');
   document.getElementById('page-divs').innerHTML = `
     <div class="topbar"><h2>Divergências</h2><p>Referências com problemas</p></div>
+    ${searchBarHTML()}
     <div class="add-box">
       <div class="add-row">
         <input type="text" id="new-div-ref" placeholder="Referência (ex: REF-1042)" onkeydown="if(event.key==='Enter')document.getElementById('new-div-desc').focus()"/>
@@ -754,16 +861,17 @@ function renderEstoque() {
 
   let content = '';
   if (state.estTab === 'saida' || state.estTab === 'b2') {
-    const lista = state.estTab === 'saida' ? state.saida : state.b2;
+    const lista = (state.estTab === 'saida' ? state.saida : state.b2).filter(matchSearch);
     const cards = lista.length === 0
       ? '<div class="empty">Nenhuma movimentação registrada.</div>'
       : lista.map(item => estCard(item)).join('');
     content = `
       <div class="add-box">
-        <div class="add-grid">
+        <div class="add-grid" style="grid-template-columns:1fr 2fr 1fr auto auto">
           <div class="field"><label>Referência</label><select id="new-est-ref" onchange="onEstRefChange()">${refOpts}</select></div>
           <div class="field"><label>Descrição</label><input type="text" id="new-est-desc" placeholder="Auto ao selecionar ref."/></div>
           <div class="field"><label id="lbl-est-caixas">Caixas</label><input type="number" id="new-est-caixas" placeholder="Qtd." oninput="updateEstPecas()"/></div>
+          ${dateFieldHTML('new-est-data')}
           <button class="btn-add" onclick="addEst()">+ Add</button>
         </div>
       </div>${cards}`;
@@ -775,6 +883,7 @@ function renderEstoque() {
 
   document.getElementById('page-estoque').innerHTML = `
     <div class="topbar"><h2>Estoque Mbrink</h2><p>Movimentações de saída, entrada e estoque B2</p></div>
+    ${searchBarHTML()}
     <div class="tabs">
       <button class="tab ${state.estTab==='saida'?'active':''}" onclick="setEstTab('saida')">Saída → Matriz</button>
       <button class="tab ${state.estTab==='b2'?'active':''}" onclick="setEstTab('b2')">Entrada B2</button>
@@ -819,7 +928,7 @@ function renderSaldoB2() {
 function renderBaixaB2(refOpts) {
   const outCards = state.b2out.length === 0
     ? '<div class="empty" style="padding:20px">Nenhuma baixa registrada.</div>'
-    : state.b2out.map(item => `<div class="card" style="padding:10px 14px;margin-bottom:6px"><div class="card-row"><div class="card-info">
+    : state.b2out.filter(matchSearch).map(item => `<div class="card" style="padding:10px 14px;margin-bottom:6px"><div class="card-row"><div class="card-info">
         <div class="card-meta"><span class="badge ref">${escapeHtml(item.ref)}</span><span class="card-date">${item.data}</span></div>
         <div style="font-size:13px;color:inherit">${item.caixas} cx / ${item.pecas} pcs${item.obs ? ' — '+escapeHtml(item.obs) : ''}</div>
       </div><div class="card-btns">
@@ -828,10 +937,11 @@ function renderBaixaB2(refOpts) {
   return `
     <div class="add-box">
       <div style="font-size:13px;font-weight:600;margin-bottom:10px">Dar baixa no B2</div>
-      <div class="add-grid" style="grid-template-columns:1fr 1fr 2fr auto">
+      <div class="add-grid" style="grid-template-columns:1fr 1fr 2fr auto auto">
         <div class="field"><label>Referência</label><select id="new-b2out-ref" onchange="onB2OutRefChange()">${refOpts}</select></div>
         <div class="field"><label id="lbl-b2out-pcs">Qtd. caixas</label><input type="number" id="new-b2out-cx" placeholder="Qtd." oninput="updateB2OutPecas()"/></div>
         <div class="field"><label>Observação</label><input type="text" id="new-b2out-obs" placeholder="Motivo (opcional)"/></div>
+        ${dateFieldHTML('new-b2out-data')}
         <button class="btn-add" onclick="addB2Out()">− Baixa</button>
       </div>
     </div>
@@ -870,7 +980,7 @@ function addEst() {
   if (!refStr || !cx) return toast('Preencha referência e caixas!');
   const r = state.refs.find(x => x.ref === refStr);
   const pecas = Number(cx) * r.ppc;
-  const item = { id:uid(), ref:refStr, desc:desc||r.desc, caixas:Number(cx), pecas, data:hoje(), auto:false };
+  const item = { id:uid(), ref:refStr, desc:desc||r.desc, caixas:Number(cx), pecas, data:getDateVal('new-est-data'), auto:false };
   if (state.estTab === 'saida') { state.saida.unshift(item); save('saida'); }
   else                          { state.b2.unshift(item);    save('b2');    }
   document.getElementById('new-est-ref').value = '';
@@ -947,7 +1057,7 @@ function addB2Out() {
   const saiCx = state.b2out.filter(e => e.ref === refStr).reduce((a,e) => a + e.caixas, 0);
   if (cx > (entCx - saiCx)) return toast(`Saldo insuficiente! Disponível: ${entCx - saiCx} cx`);
   const pecas = cx * r.ppc;
-  state.b2out.unshift({ id:uid(), ref:refStr, desc:r.desc, caixas:cx, pecas, data:hoje(), obs });
+  state.b2out.unshift({ id:uid(), ref:refStr, desc:r.desc, caixas:cx, pecas, data:getDateVal('new-b2out-data'), obs });
   save('b2out');
   document.getElementById('new-b2out-ref').value = '';
   document.getElementById('new-b2out-cx').value = '';
@@ -970,16 +1080,17 @@ function renderMont() {
 
   let tabContent = '';
   if (state.montTab === 'envios') {
-    const envioCards = state.mont.length === 0
+    const envioCards = state.mont.filter(matchSearch).length === 0
       ? '<div class="empty">Nenhum envio registrado.</div>'
-      : state.mont.map(item => montCard(item)).join('');
+      : state.mont.filter(matchSearch).map(item => montCard(item)).join('');
     tabContent = `
       <div class="add-box">
         <div style="font-size:13px;font-weight:600;margin-bottom:8px">Registrar envio para montagem</div>
-        <div class="add-grid" style="margin-top:4px">
+        <div class="add-grid" style="margin-top:4px;grid-template-columns:1fr 2fr 1fr auto auto">
           <div class="field"><label>Referência</label><select id="new-mont-ref" onchange="onMontRefChange()">${refOpts}</select></div>
           <div class="field"><label>Descrição</label><input type="text" id="new-mont-desc" placeholder="Auto ao selecionar ref."/></div>
           <div class="field"><label>Peças enviadas</label><input type="number" id="new-mont-pecas" placeholder="Qtd."/></div>
+          ${dateFieldHTML('new-mont-data')}
           <button class="btn-add" onclick="addEnvio()">+ Add</button>
         </div>
       </div>${envioCards}`;
@@ -1003,9 +1114,9 @@ function renderMont() {
         }).join('')}</tbody></table></div>`;
     }
   } else {
-    const retCards = state.ret.length === 0
+    const retCards = state.ret.filter(matchSearch).length === 0
       ? '<div class="empty">Nenhum retorno registrado.</div>'
-      : state.ret.map(item => retCard(item)).join('');
+      : state.ret.filter(matchSearch).map(item => retCard(item)).join('');
     tabContent = `
       <div class="add-box">
         <div style="font-size:13px;font-weight:600;margin-bottom:3px">Registrar retorno</div>
@@ -1025,12 +1136,16 @@ function renderMont() {
           <div class="field"><label id="lbl-ret-b2">Caixas → B2</label><input type="number" id="new-ret-cx-b2" placeholder="Qtd." oninput="updateRetCalc()"/></div>
           <div class="field"><label id="lbl-ret-mat">Caixas → Matriz</label><div class="display" id="ret-mat-display">0 cx — 0 pcs</div></div>
         </div>
-        <button class="btn-add full" onclick="addRetorno()">✓ Registrar retorno</button>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          ${dateFieldHTML('new-ret-data')}
+          <button class="btn-add full" onclick="addRetorno()">✓ Registrar retorno</button>
+        </div>
       </div>${retCards}`;
   }
 
   document.getElementById('page-mont').innerHTML = `
     <div class="topbar"><h2>Montagem Mbrink</h2><p>Controle de envio e retorno da montagem</p></div>
+    ${searchBarHTML()}
     <div class="tabs">
       <button class="tab ${state.montTab==='envios'?'active':''}" onclick="setMontTab('envios')">Envios</button>
       <button class="tab ${state.montTab==='montando'?'active':''}" onclick="setMontTab('montando')">Montando</button>
@@ -1101,7 +1216,7 @@ function addEnvio() {
   const pecas = document.getElementById('new-mont-pecas').value;
   if (!refStr || !pecas) return toast('Preencha ref. e peças!');
   const r = state.refs.find(x => x.ref === refStr);
-  state.mont.unshift({ id:uid(), ref:refStr, desc:desc||r.desc, pecas:Number(pecas), pecasRet:0, data:hoje(), status:'montagem' });
+  state.mont.unshift({ id:uid(), ref:refStr, desc:desc||r.desc, pecas:Number(pecas), pecasRet:0, data:getDateVal('new-mont-data'), status:'montagem' });
   save('mont');
   document.getElementById('new-mont-ref').value = '';
   document.getElementById('new-mont-desc').value = '';
@@ -1122,7 +1237,7 @@ function addRetorno() {
   const pcsB2 = cxB2 * ppc;
   const pcsMat = cxMat * ppc;
   const finalDesc = desc || r.desc;
-  const data = hoje();
+  const data = getDateVal('new-ret-data');
   // retorno record
   const retId = uid();
   state.ret.unshift({ id:retId, ref:refStr, desc:finalDesc, caixas:cx, pecas, caixasB2:cxB2, pecasB2:pcsB2, caixasMat:cxMat, pecasMat:pcsMat, data });
@@ -1213,9 +1328,11 @@ function saveMontEdit() {
 // ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
-loadAll();
 loadTheme();
-renderAll();
+(async () => {
+  await loadAll();
+  renderAll();
+})();
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
